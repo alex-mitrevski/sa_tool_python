@@ -99,6 +99,7 @@ class SATool:
         max_matching = []
 
         degree_of_constraints = self.R.degree(self.constraints)
+        degree_of_constraints = dict(degree_of_constraints)
 
         # Swapping the key with value of dict degree_of_constraints
         # value (degree ) is not unique
