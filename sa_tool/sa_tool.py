@@ -20,7 +20,7 @@ class SATool:
 
         #Copying the graph provided by the user
         self.G = graph
-        
+
         #Creating a Directed graph with all bidirectional edges
         self.D = graph.to_directed()
 
@@ -56,12 +56,14 @@ class SATool:
         #Creating reduced graph by removing known variables
         self.R = self.G.copy()
         self.R.remove_nodes_from(self.known)
-        
+
         #Removing edges which cannot be matched
         #Example with derivative casuality
+        edges_to_remove = []
         for x,y in  self.R.edges():
             if 'derivative_casuality' in self.G[x][y] :
-                self.R.remove_edge(x,y)
+                edges_to_remove.append((x,y))
+        self.R.remove_edges_from(edges_to_remove)
 
     def calculate_matching_ranking_constraints(self):
         '''
@@ -71,7 +73,7 @@ class SATool:
         "Fault Diagnosis and Fault-tolerant Control " Chapter 5.
 
         "The idea is to start with constraint with smallest number of edges
-        with variables and to propagate step by step by matching constraint 
+        with variables and to propagate step by step by matching constraint
         and unmatched variable step "
 
         Pre requisitive:
@@ -82,7 +84,7 @@ class SATool:
             2. Loop on the nodes starting from node with smallest degree
             3. For each node(constraint) -> Find the neighbors(variables)
             4. for each neighbor -> check if the neighbor(variable) is in the matched variable list
-                if present then 
+                if present then
                     add the (constraint-variable) pair to the matching list
                     remove the variable from the unmatched constraint list
                     break since the constraint is matched
@@ -91,11 +93,11 @@ class SATool:
             Maximum matching
 
         Assumptions :
-            
+
         '''
         unmarked_variables = self.variables.copy()
         max_matching = []
-    
+
         degree_of_constraints = self.R.degree(self.constraints)
 
         # Swapping the key with value of dict degree_of_constraints
@@ -107,7 +109,7 @@ class SATool:
 
         for deg in ddict:
             for constraint in ddict[deg]:
-                # For each constraint find the edge to the corresponding 
+                # For each constraint find the edge to the corresponding
                 # variable. Add the edge to the max matching if the variable
                 # is not matched
                 variables = self.R.neighbors(constraint)
@@ -144,13 +146,13 @@ class SATool:
                 from constraint to matched variable
             for non matched constraints :
                 from all varaibles to constraints
-                
+
         Algo :
-            The max matching list contains edge in both direction 
+            The max matching list contains edge in both direction
             i.e. from constraint to variables and variables to constraints
             loop on the matching list
             check if the edge startd from a constraint node
-            if yes 
+            if yes
                 add the edge to the orientation list
                 find connected nodes of the constraint node
                 add edge from connected node to the constraint node
@@ -178,7 +180,7 @@ class SATool:
         pos = dict()
         pos.update( (n, (1, i)) for i, n in enumerate(self.constraints) ) # put nodes from self.variables at x=1
         pos.update( (n, (2, i)) for i, n in enumerate(self.variables) ) # put nodes from self.constraints at x=2
-    
+
         fig, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(8,8))
         # nodes
         nx.draw_networkx_nodes(self.G,pos,ax=ax1,
@@ -233,7 +235,7 @@ class SATool:
         red_patch = mpatches.Patch(color='red', label='Unmatched Constraint')
         yellow_patch = mpatches.Patch(color='yellow', label='Variables')
         green_patch = mpatches.Patch(color='green', label='Constraints')
-        plt.legend(handles=[red_patch, yellow_patch, green_patch]) 
+        plt.legend(handles=[red_patch, yellow_patch, green_patch])
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
         '''
         fig.suptitle(self.G.name, fontsize=14, fontweight='bold')
